@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Green Spaces Initiative</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<style>
+/* —— COLORS & GLOBAL —— */
+:root{--forest:#022615;--fern:#1d6d46;--moss:#44b96f;--mint:#a9ffd8;
+      --glass:rgba(255,255,255,.08);--blur:blur(10px) brightness(1.12);--shadow:0 14px 40px rgba(0,0,0,.45)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Montserrat,sans-serif;color:#fff;background:var(--forest);min-height:100vh;overflow-x:hidden;line-height:1.6}
+
+/* dotted texture */
+body::before{content:'';position:fixed;inset:0;z-index:-6;
+  background-image:radial-gradient(rgba(255,255,255,.035)1px,transparent1px);background-size:42px 42px}
+
+/* endless vine (left only) */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:-5;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='8000'%3E%3Cpath d='M60 0 Q40 150 60 300 T60 600 T60 900 T60 1200 T60 1500 T60 1800 T60 2100 T60 2400 T60 2700 T60 3000 T60 3300 T60 3600 T60 3900 T60 4200 T60 4500 T60 4800 T60 5100 T60 5400 T60 5700 T60 6000 T60 6300 T60 6600 T60 6900 T60 7200 T60 7500 T60 7800' stroke='%231d6d46' stroke-width='6' fill='none'/%3E%3Ccircle cx='60' cy='150' r='10' fill='%2344b96f'/%3E%3Ccircle cx='60' cy='450' r='10' fill='%2344b96f'/%3E%3Ccircle cx='60' cy='750' r='10' fill='%2344b96f'/%3E%3C/svg%3E") left top/120px repeat-y;
+}
+
+/* conic & cursor glow */
+.conic{position:fixed;inset:-25%;z-index:-4;filter:blur(240px);opacity:.14;
+  background:conic-gradient(from0deg,var(--fern),var(--forest),var(--fern));animation:spin40s linear infinite alternate}
+@keyframes spin{to{transform:rotate(1turn)}}
+.cursor{position:fixed;inset:-30%;z-index:-3;pointer-events:none;transition:.06s;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),var(--moss)0%,transparent60%);filter:blur(140px);opacity:.18}
+
+/* —— NAVBAR —— */
+nav{position:fixed;inset:0;height:70px;display:flex;justify-content:space-between;align-items:center;
+  padding:0 2rem;background:rgba(0,0,0,.44);backdrop-filter:var(--blur);border-bottom:1px solid rgba(255,255,255,.1);z-index:900;transition:.4s}
+nav.hide{transform:translateY(-110%)}
+nav .logo{display:flex;align-items:center;gap:.6rem;font-family:'Playfair Display',serif;font-size:1.5rem}
+nav .logo img{height:40px;border-radius:8px;box-shadow:var(--shadow)}
+nav ul{display:flex;gap:1.6rem;list-style:none}
+nav ul a{color:#fff;font-weight:600;text-decoration:none;position:relative}
+nav ul a::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:2px;background:var(--moss);transition:.3s}
+nav ul a:hover{color:var(--mint)}nav ul a:hover::after{width:100%}
+.burger{display:none}@media(max-width:760px){.burger{display:block;font-size:1.8rem;color:#fff;cursor:pointer}
+ nav ul{position:fixed;inset:0;flex-direction:column;justify-content:center;align-items:center;gap:2.5rem;background:rgba(0,0,0,.93);transform:translateY(-100%);transition:.4s}
+ nav.open ul{transform:translateY(0)}}
+
+/* —— CUSTOM SCROLL BAR (starts hidden) —— */
+#bar{position:fixed;right:34px;top:50%;transform:translateY(-50%);width:5px;height:64vh;background:rgba(255,255,255,.14);
+     border-radius:3px;z-index:700;overflow:hidden;opacity:0;transition:.3s}
+#bar-thumb{width:100%;height:22%;background:var(--moss);border-radius:3px}
+
+/* —— SECTIONS, HEADINGS, TEXT —— */
+section{padding:4rem 7% 4rem}
+h1,h2{font-family:'Playfair Display',serif}
+h1{font-size:3.6rem;text-align:center;background:linear-gradient(90deg,var(--mint),var(--moss));-webkit-background-clip:text;color:transparent}
+h2{font-size:2.3rem;color:var(--moss);margin-bottom:1.3rem}
+p{max-width:900px;margin-bottom:1rem;font-size:1.1rem}
+
+/* —— HERO —— */
+#home{padding:100px 7% 2rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:1.2rem;position:relative}
+#home img{width:230px;filter:drop-shadow(0 0 22px rgba(68,185,111,.55));transition:.25s}
+#home:hover img{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+.scrollcue{
+  position:absolute;top:-55vh;left:50%;transform:translateX(-50%);
+  width:92px;height:92px;border:4px solid var(--mint);border-radius:50%;
+  font-size:3rem;color:var(--mint);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  animation:bounce 2s infinite ease-in-out
+}
+@keyframes bounce{0%,20%,50%,80%,100%{transform:translate(-50%,0)}
+40%{transform:translate(-50%,-12px)}60%{transform:translate(-50%,-8px)}}
+@media(max-width:480px){#home img{width:170px}h1{font-size:2.9rem}.scrollcue{width:72px;height:72px;font-size:2.4rem;top:42vh}}
+
+/* —— GRID CARDS / ACCORDION / TIMELINE / PDF / CONTACT styles (unchanged) —— */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2rem}
+.card{padding:2rem 1.6rem;border-radius:1.25rem;background:var(--glass);backdrop-filter:var(--blur);text-align:center;box-shadow:var(--shadow);transition:.35s}
+.card:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 18px 46px rgba(0,0,0,.55)}
+.card img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid var(--mint);margin-bottom:1rem}
+.card h3{font-size:1.2rem;margin-bottom:.2rem}.card span{font-weight:600;color:var(--mint);display:block;margin-bottom:.55rem}
+.card p{font-size:.93rem}
+
+.acc{max-width:900px;margin:1.3rem auto}.item{border-bottom:1px solid rgba(255,255,255,.12)}
+.head{padding:1rem 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.head h3{font-size:1.25rem;color:var(--mint)}.head span{font-size:1.6rem;transition:.3s}
+.body{max-height:0;overflow:hidden;opacity:0;transition:max-height .6s ease,opacity .6s}.body.open{opacity:1}
+.body p{margin:.6rem 0 1rem}
+
+.timeline{max-width:900px;margin-top:2rem;position:relative}
+.timeline::before{content:'';position:absolute;left:50%;top:0;width:4px;height:100%;background:rgba(255,255,255,.12)}
+.event{width:46%;padding:1.6rem;border-radius:1rem;background:var(--glass);backdrop-filter:var(--blur);box-shadow:var(--shadow);position:relative}
+.event:nth-child(odd){left:0;text-align:right}.event:nth-child(even){left:54%}
+.event::after{content:'';position:absolute;top:1rem;width:16px;height:16px;border-radius:50%;background:var(--moss)}
+.event:nth-child(odd)::after{right:-8px}.event:nth-child(even)::after{left:-8px}
+.event time{font-size:.85rem;color:var(--moss);display:block;margin-bottom:.25rem}.event h4{color:var(--mint);margin-bottom:.3rem}
+@media(max-width:800px){
+ .timeline::before{left:14px}.event,.event:nth-child(odd),.event:nth-child(even){width:100%;left:0;text-align:left;padding-left:2.6rem}.event::after{left:-8px}}
+
+.flyer{width:100%;height:520px;border:none;border-radius:1rem;box-shadow:var(--shadow);margin-top:3rem}
+.contact{list-style:none;font-size:1.07rem}.contact li{margin-bottom:.7rem}.contact a{color:var(--mint);text-decoration:none}
+
+#topBtn{position:fixed;right:1.2rem;bottom:1.2rem;width:48px;height:48px;border:none;border-radius:50%;background:var(--moss);
+        color:#002814;font-size:1.45rem;font-weight:700;cursor:pointer;display:none;box-shadow:var(--shadow);transition:.3s}
+#topBtn:hover{transform:scale(1.12)}
+
+.firefly{position:fixed;inset:0;pointer-events:none;z-index:1000}
+.firefly span{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--mint);filter:blur(6px) brightness(2.6);
+              transform:translate(-50%,-50%);transition:.09s}
+</style>
+</head>
+<body>
+<div class="conic"></div><div class="cursor"></div><canvas id="bgCanvas"></canvas>
+<div class="firefly"><span></span></div>
+
+<div id="bar"><div id="bar-thumb"></div></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#home" class="logo"><img src="gsilogogsi.jpg" alt>GSI</a>
+  <div class="burger" onclick="nav.classList.toggle('open')">&#9776;</div>
+  <ul><li><a href="#home">Home</a></li><li><a href="#team">Team</a></li><li><a href="#accomplishments">Accomplishments</a></li><li><a href="#events">Events</a></li><li><a href="#contact">Contact</a></li></ul>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+  <img src="gsilogogsi.jpg" id="logo" alt>
+  <h1>Green Spaces Initiative</h1>
+  <p>Enhancing nature & communities through action, innovation &amp; stewardship.</p>
+  <div class="scrollcue" onclick="document.querySelector('#team').scrollIntoView({behavior:'smooth'})">⌄</div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <h2>Meet the Team</h2>
+  <div class="grid">
+    <div class="card"><img src="Saatvik.jpeg" alt><h3>Saatvik Guduru</h3><span>Founder</span><p>CS50 grad &amp; varsity runner steering our vision.</p></div>
+    <div class="card"><img src="srimangsipic.jpg" alt><h3>Sriman Arji</h3><span>Founder</span><p>Life Scout &amp; future civil engineer focused on sustainability.</p></div>
+    <div class="card"><img src="abhiramgsipic.jpg" alt><h3>Abhiram Pulijala</h3><span>Marketing Director · Co‑Founder</span><p>Scout leader who loves <b>coding</b>, STEM &amp; amplifying our impact.</p></div>
+    <div class="card"><img src="ashwathgsipic.jpg" alt><h3>Ashwath Rajakkal</h3><span>Head of Treasury · Co‑Founder</span><p>Black‑belt novelist managing project resources.</p></div>
+    <div class="card"><img src="sahilgsipic.jpg" alt><h3>Sahil Kulkarni</h3><span>Historian · Co‑Founder</span><p>Clarinet ace researching green‑space wellbeing.</p></div>
+    <div class="card"><img src="Alay.jpeg" alt><h3>Alay</h3><span>Social Media Ambassador</span><p>STEM enthusiast sparking community buzz.</p></div>
+    <div class="card"><img src="Srisaran.png" alt><h3>Srisaran</h3><span>Social Media Ambassador</span><p>Digital storyteller showcasing every victory.</p></div>
+  </div>
+</section>
+
+<!-- ACCOMPLISHMENTS -->
+<section id="accomplishments">
+  <h2>Accomplishments</h2>
+  <div class="acc">
+    <div class="item"><div class="head"><h3>My Soundscape Project</h3><span>+</span></div><div class="body"><p>Sound‑mapped parks — featured by Lawrence O’Gorman’s <em>My Soundscape</em>.</p></div></div>
+    <div class="item"><div class="head"><h3>Sierra Club Partnership</h3><span>+</span></div><div class="body"><p>Joint restoration events &amp; policy advocacy across NJ.</p></div></div>
+    <div class="item"><div class="head"><h3>Environmental Engineering Bootcamp</h3><span>+</span></div><div class="body"><p>Weekend eco‑engineering fun for middle &amp; elementary students.</p></div></div>
+  </div>
+  <iframe class="flyer" src="Greenspacesinitiative-1.pdf"></iframe>
+</section>
+
+<!-- EVENTS -->
+<section id="events">
+  <h2>Upcoming Events</h2>
+  <div class="timeline">
+    <div class="event"><time>24 Aug 2025</time><h4>Park Clean‑up</h4><p>Papaianni Park litter sweep &amp; invasive removal.</p></div>
+    <div class="event"><time>13 Sep 2025</time><h4>Sustainability Workshop</h4><p>Up‑cycling hacks &amp; compost demos at Edison Library.</p></div>
+    <div class="event"><time>5–6 Oct 2025</time><h4>Data Hackathon</h4><p>Building air‑quality sensors in 48 hours.</p></div>
+    <div class="event"><time>16 Nov 2025</time><h4>Green Gala</h4><p>Celebrating eco‑heroes &amp; funding programs.</p></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <h2>Contact</h2>
+  <ul class="contact">
+    <li>Sriman Arji — <a href="mailto:sriman.arji@gmail.com">sriman.arji@gmail.com</a></li>
+    <li>Saatvik Guduru — <a href="mailto:bhusre1@gmail.com">bhusre1@gmail.com</a></li>
+    <li>Sahil Kulkarni — <a href="mailto:ksahil0815@gmail.com">ksahil0815@gmail.com</a></li>
+    <li>Abhiram Pulijala — <a href="mailto:abhirampulijala2014@gmail.com">abhirampulijala2014@gmail.com</a></li>
+    <li>Ashwath Rajakkal — <a href="mailto:ashwath.rajakkal@gmail.com">ashwath.rajakkal@gmail.com</a></li>
+    <li>GSI — <a href="mailto:initiativegreenspaces@gmail.com">initiativegreenspaces@gmail.com</a></li>
+  </ul>
+</section>
+
+<button id="topBtn" aria-label="top">↑</button>
+
+<!-- JS -->
+<script>
+/* cursor glow coords */
+onmousemove=e=>{
+ document.body.style.setProperty('--mx',`${e.clientX/innerWidth*100}%`);
+ document.body.style.setProperty('--my',`${e.clientY/innerHeight*100}%`);
+};
+
+/* nav hide, scroll bar fade‑in & top button */
+const nav=document.getElementById('nav'),
+      bar=document.getElementById('bar'),thumb=document.getElementById('bar-thumb'),
+      topBtn=document.getElementById('topBtn');
+let prev=0;
+addEventListener('scroll',()=>{
+ const y=scrollY,max=document.body.scrollHeight-innerHeight;
+ nav.classList.toggle('hide',y>prev&&y>200);prev=y;
+ bar.style.opacity=y>200?1:0;
+ thumb.style.transform=`translateY(${y/max*100}%)`;
+ topBtn.style.display=y>600?'block':'none';
+});
+
+/* smooth anchors */
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.onclick=e=>{
+ e.preventDefault();nav.classList.remove('open');
+ const s=document.querySelector(a.getAttribute('href'));if(s)scrollTo({top:s.offsetTop-70,behavior:'smooth'});
+});
+topBtn.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+
+/* hero tilt */
+const logo=document.getElementById('logo');
+addEventListener('mousemove',e=>{
+ logo.style.setProperty('--ry',`${(e.clientX-innerWidth/2)/60}deg`);
+ logo.style.setProperty('--rx',`${-(e.clientY-innerHeight/2)/60}deg`);
+});
+
+/* accordion */
+document.querySelectorAll('.head').forEach(h=>h.onclick=()=>{
+ const b=h.nextElementSibling,i=h.querySelector('span'),o=!b.classList.contains('open');
+ b.classList.toggle('open');b.style.maxHeight=o?b.scrollHeight+'px':'0';i.textContent=o?'–':'+';});
+
+/* GSAP reveals (skip hero) */
+gsap.utils.toArray('section').forEach(sec=>{
+ if(sec.id!=='home'){gsap.from(sec,{opacity:0,y:80,duration:1,scrollTrigger:{trigger:sec,start:'top 88%'}});}
+});
+gsap.utils.toArray('.event').forEach((e,i)=>
+ gsap.from(e,{opacity:0,x:i%2?120:-120,duration:1,scrollTrigger:{trigger:e,start:'top 85%'}}));
+
+/* firefly follower */
+const dot=document.querySelector('.firefly span');
+addEventListener('mousemove',e=>{dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px';});
+
+/* canvas stars / snowflakes */
+const c=document.getElementById('bgCanvas'),ctx=c.getContext('2d');
+function fit(){c.width=innerWidth;c.height=innerHeight}fit();addEventListener('resize',fit);
+const rings=[...Array(8)].map((_,i)=>({r:40+i*80}));
+const stars=[...Array(200)].map(()=>({
+  x:Math.random()*c.width,
+  y:Math.random()*c.height,
+  a:Math.random()*0.8+0.2,
+  d:Math.random()>.5?1:-1,
+  vy:0.15+Math.random()*0.35         /* falling speed */
+}));
+(function loop(){
+ ctx.clearRect(0,0,c.width,c.height);
+
+ /* rings */
+ ctx.lineWidth=2;ctx.strokeStyle='rgba(68,185,111,.06)';
+ rings.forEach(r=>{
+   ctx.beginPath();ctx.arc(c.width/2,c.height/2,r.r,0,Math.PI*2);ctx.stroke();
+   r.r+=.07;r.r>Math.max(c.width,c.height)&&(r.r=40);
+ });
+
+ /* stars / flakes */
+ stars.forEach(s=>{
+   ctx.fillStyle=`rgba(169,255,216,${s.a})`;
+   ctx.fillRect(s.x,s.y,3,3);
+   s.y+=s.vy;                         /* fall */
+   if(s.y>c.height) s.y=0, s.x=Math.random()*c.width;
+   s.a+=.012*s.d;                    /* twinkle */
+   if(s.a<.2||s.a>.8) s.d*=-1;
+ });
+
+ requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
